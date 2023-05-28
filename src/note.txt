@@ -1,0 +1,31 @@
+import {
+  Body,
+  Controller,
+  Query,
+  Delete,
+  Get,
+  HttpCode,
+  Post,
+} from '@nestjs/common';
+import { UsePipes } from '@nestjs/common/decorators';
+import { ValidationPipe } from '@nestjs/common/pipes';
+import { ChatService } from '../../services/chat.service';
+import { WebSocketGateway } from '@nestjs/websockets';
+import { ChatGateway } from '../../gateways/chat.gateway';
+
+
+@Controller('chat')
+export class ChatController {
+  constructor(private readonly chatService: ChatService) {}
+
+  // @Get('')
+  // async getTodo() {
+  //   return await this.todoService.getTodo();
+  // }
+  // @Post('/update')
+  // @HttpCode(200)
+  // @UsePipes(ValidationPipe)
+  // async updateTodo(@Query() id, @Body() todoData: CreateTodoDto) {
+  //   return await this.todoService.updateTodo(id, todoData);
+  // }
+}
