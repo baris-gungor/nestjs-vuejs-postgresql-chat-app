@@ -1,3 +1,4 @@
+#### Hello everyone my name is Barış and this is my chat app project. As I said this is a chat app built with Nest.js(Node.js framework), Vue.js(Front end javascript framework), Websocket(two way data transfering method), Postgresql(database). I was learning about these technologies and created this project to understand more. There is a guide down below how you can start the project.
 # Running the app
 
 ## For API, in root folder do this:
