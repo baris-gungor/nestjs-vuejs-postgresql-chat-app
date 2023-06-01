@@ -35,7 +35,6 @@
             <p>{{ item.createdAt }}</p>
           </div>
         </div>
-
         <div v-if="userSelected">
           <v-textarea
             label="Write your message.."
@@ -151,8 +150,9 @@ export default {
         })
         .catch((err) => console.error(err));
       this.webSocket.on('recMessage', (message) => {
-        messages.push(message);
-        this.items = messages;
+        this.selectedUser(this.userSelected);
+        // messages.push(message);
+        // this.items = messages;
       });
       setTimeout(
         document.getElementById(this.lastMessageId).scrollIntoView(),
@@ -313,6 +313,7 @@ export default {
 .sc-home-messagelist {
   width: 100%;
   height: 90%;
+  max-height: 390px;
   overflow-y: scroll;
   scroll-behavior: smooth;
   overflow-anchor: auto;

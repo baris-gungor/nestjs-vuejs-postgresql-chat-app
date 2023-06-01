@@ -1,43 +1,41 @@
-version: '3'
+version: "3"
 services:
-  app:
+  vue-app:
     build:
-      context: .
+      context: ./vue-app
       dockerfile: Dockerfile
     ports:
-      - 3000:3000
-    environment:
-      - NODE_ENV=production
-# services:
-#   api:
-#     build:
-#       dockerfile: Dockerfile
-#       context: .
-#       # Only will build development stage from our dockerfile
-#       target: development
-#     volumes:
-#       - .:/usr/src/app
-#     env_file:
-#     - .env
-#     # Run a command against the development stage of the image
-#     command: npm run start:dev
-#     ports:
-#       - 3000:3000
-#     depends_on:
-#       - postgres
+      - "8080:8080"
+    image: vue-app
+    volumes:
+      - ./vue-app:/app
+    container_name: vue-app
 
-#   postgres:
-#     image: postgres
-#     restart: always
-#     env_file:
-#       - .env
-#     # environment:
-#     #   POSTGRES_DB: ${DB_NAME}
-#     #   POSTGRES_USER: ${DB_USER}
-#     #   POSTGRES_PASSWORD: ${DB_PASS}
-#     ports:
-#       - '5432:5432'
-#     volumes:
-#       - docker-nest-postgres:/var/lib/postgresql/data
-# volumes:
-#   docker-nest-postgres:
+  nest-api:
+    build:
+      context: ./nest-api
+      dockerfile: Dockerfile
+    image: nest-api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    environment:
+      - .env
+    volumes:
+      - ./nest-api:/app
+    container_name: nest-api
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+    ports:
+      - 5432:5432
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    container_name: postgres
+volumes:
+  pg-data:

@@ -16,4 +16,10 @@ export class UsersController {
   async getUsers() {
     return await this.usersService.getUsers();
   }
+
+  @Post('adduser')
+  @HttpCode(200)
+  async addUser(@Body() data: any) {
+    return await this.usersService.addUser(data);
+  }
 }

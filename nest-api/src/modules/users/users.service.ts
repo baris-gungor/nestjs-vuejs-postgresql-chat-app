@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Users } from './users.entity';
 
-
 @Injectable()
 export class UsersService {
   constructor(
@@ -48,6 +47,21 @@ export class UsersService {
 
   async getUsers() {
     return await this.usersRepository.find();
+  }
+  
+  async addUser(data: any) {
+    console.log(data);
+    const res = await this.usersRepository
+      .createQueryBuilder()
+      .select('user')
+      .from(Users, 'user')
+      .where('user.username = :username', { username: data.username })
+      .getOne();
+    if (res === null) {
+      return {};
+    } else {
+      return await this.usersRepository.save(data);
+    }
   }
 
   // async saveUsers(data) {

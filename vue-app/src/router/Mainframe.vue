@@ -76,11 +76,9 @@ export default {
     ],
     drawer: null,
   }),
-  created() {
-  },
+  created() {},
   computed: {},
-  methods: {
-  },
+  methods: {},
   mounted() {
     let htmlElement = document.documentElement;
     let theme = localStorage.getItem('theme');
@@ -133,11 +131,11 @@ export default {
   border-color: var(--primaryBack);
 }
 .container {
-  margin-top: 20px !important;
+  margin-top: 0px !important;
   background-color: var(--secondaryBack);
   border-color: var(--primaryBack);
   border-radius: 8px;
-  height: 96%;
+  height: 97%;
 }
 .sc-side-container {
   background-color: var(--secondaryBack) !important;
@@ -159,6 +157,7 @@ export default {
 }
 .sc-top-header {
   background-color: var(--primaryBack) !important;
+  height: 40px !important;
 }
 .sc-top-hamburger {
   color: var(--buttonText) !important;

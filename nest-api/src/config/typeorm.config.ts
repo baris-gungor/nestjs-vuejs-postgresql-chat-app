@@ -1,6 +1,4 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { Chat } from '../modules/chat';
-import { Users } from '../modules/users';
 require('dotenv').config();
 
 export const typeOrmConfig: TypeOrmModuleOptions = {
