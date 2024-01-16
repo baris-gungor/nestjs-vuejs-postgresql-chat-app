@@ -1,26 +1,36 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeOrmConfig } from './config/typeorm.config';
+import { DatabaseModule } from './database/database.module';
 import {
-  UsersRepository,
-  Users,
-  UsersController,
-  UsersService,
-} from './modules/users';
-import {
-  ChatGateway,
-  ChatService,
-  Chat,
-  ChatRepository,
-  ChatController,
-} from './modules/chat';
+  Logger,
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  OnModuleInit,
+} from '@nestjs/common';
+import { AppService } from './app.service';
+import { CronModule, HealthModule, UsersModule } from './modules';
+import { ChatModule } from './modules/chat/chat.module';
+import { LoggingModule } from './modules/logging/logging.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(typeOrmConfig),
-    TypeOrmModule.forFeature([ChatRepository, Chat, UsersRepository, Users]),
+    HealthModule,
+    DatabaseModule,
+    CronModule,
+    UsersModule,
+    ChatModule,
+    LoggingModule,
   ],
-  controllers: [ChatController, UsersController],
-  providers: [ChatService, UsersService, ChatGateway],
+  controllers: [],
+  providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  constructor(private readonly appService: AppService) {}
+  private readonly logger = new Logger(AppModule.name);
+  async onModuleInit() {
+    try {
+      await this.appService.seedDB();
+    } catch (error) {
+      this.logger.error('AppModule Seed Proccess gives an error:', error);
+    }
+  }
+}

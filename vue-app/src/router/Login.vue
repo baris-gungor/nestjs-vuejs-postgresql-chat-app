@@ -55,7 +55,7 @@ export default {
   methods: {
     async reqLogin() {
       if (this.userName.length > 1 && this.password.length > 1) {
-        const url = `${this.apiUrl}/users`;
+        const url = `${this.apiUrl}/users/login`;
         const data = {
           username: this.userName,
           password: this.password,
@@ -65,6 +65,8 @@ export default {
           headers: {
             Accept: "application/json",
             "Content-Type": "application/json",
+            Authorization:
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDM2ODUwMjMsImV4cCI6MTcwMzY4ODYyM30.0f2e5j9DSWjdttKspU0pjCh_sBJaWzvp_KD1K6mIc5c",
           },
           body: JSON.stringify(data),
         };

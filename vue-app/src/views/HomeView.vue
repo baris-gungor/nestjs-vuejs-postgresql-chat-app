@@ -52,27 +52,35 @@
 </template>
 
 <script>
-import SocketioService from '../services/socketio.service';
+import SocketioService from "../services/socketio.service";
 export default {
-  name: 'Home',
+  name: "Home",
   components: {},
   data: () => ({
-    apiUrl: 'http://localhost:3000/',
+    apiUrl: "http://localhost:3000/",
     dialog: false,
     users: [],
-    text: '',
+    text: "",
     webSocket: null,
-    username: '',
-    items: '',
+    username: "",
+    items: "",
     userList: [],
     userSelected: false,
     lastMessageId: 1,
   }),
   created() {
-    const currentUser = JSON.parse(window.localStorage.getItem('session'));
+    const currentUser = JSON.parse(window.localStorage.getItem("session"));
     this.username = currentUser.username;
     // console.log(this.username);
-    fetch(this.apiUrl + 'users')
+    const header = {
+      Authorization:
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDM2ODUwMjMsImV4cCI6MTcwMzY4ODYyM30.0f2e5j9DSWjdttKspU0pjCh_sBJaWzvp_KD1K6mIc5c",
+    };
+    const data = {
+      method: "GET",
+      headers: header,
+    };
+    fetch(this.apiUrl + "users/allUsers", data)
       .then((response) => response.json())
       .then((data) => {
         data.forEach((el) => {
@@ -92,36 +100,38 @@ export default {
         text: this.text,
         sendTo: this.userSelected,
       };
-      this.webSocket.emit('sendMessage', message);
-      this.text = '';
-      if (this.items[0].username == 'system') {
+      this.webSocket.emit("sendMessage", message);
+      this.text = "";
+      if (this.items[0].username == "system") {
         this.items.shift();
       }
       window.scrollTo(0, document.body.scrollHeight);
     },
     logout() {
       window.localStorage.setItem(
-        'session',
+        "session",
         JSON.stringify({
-          username: '',
-          updateDate: '',
-        }),
+          username: "",
+          updateDate: "",
+        })
       );
       window.location.reload();
     },
     async selectedUser(data) {
       this.userSelected = data;
-      const url = `${this.apiUrl}conversation`;
+      const url = `${this.apiUrl}chat/conversation`;
       const sendData = {
         username: this.username,
         sendTo: this.userSelected,
       };
       // console.log(sendData);
       const req = {
-        method: 'POST',
+        method: "POST",
         headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization:
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDM2ODUwMjMsImV4cCI6MTcwMzY4ODYyM30.0f2e5j9DSWjdttKspU0pjCh_sBJaWzvp_KD1K6mIc5c",
         },
         body: JSON.stringify(sendData),
       };
@@ -133,9 +143,9 @@ export default {
             messages.push({
               id: 1,
               sendTo: this.username,
-              username: 'system',
-              text: 'Henüz bu kişiyle mesajlaşmadınız.',
-              createdAt: '',
+              username: "system",
+              text: "Henüz bu kişiyle mesajlaşmadınız.",
+              createdAt: "",
             });
             this.lastMessageId = 1;
             this.items = messages;
@@ -149,14 +159,14 @@ export default {
           }
         })
         .catch((err) => console.error(err));
-      this.webSocket.on('recMessage', (message) => {
+      this.webSocket.on("recMessage", (message) => {
         this.selectedUser(this.userSelected);
         // messages.push(message);
         // this.items = messages;
       });
       setTimeout(
         document.getElementById(this.lastMessageId).scrollIntoView(),
-        1000,
+        1000
       );
     },
   },

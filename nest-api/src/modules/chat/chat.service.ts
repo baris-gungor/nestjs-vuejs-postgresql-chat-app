@@ -1,16 +1,36 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { Chat } from './chat.entity';
+import { Chat } from '../../domain';
+import { ChatDto } from '../../dtos/chat.dto';
 
 @Injectable()
 export class ChatService {
   constructor(
-    @InjectRepository(Chat) private readonly chatRepository: Repository<Chat>,
+    @Inject('CHAT_REPOSITORY') private chatRepository: Repository<Chat>,
   ) {}
+  private validationPipe = new ValidationPipe({
+    transform: true,
+    whitelist: true,
+  });
+  private readonly logger = new Logger(ChatService.name);
 
-  async createMessage(chat: Chat): Promise<Chat> {
-    return await this.chatRepository.save(chat);
+  async sendMessage(chat: Chat) {
+    try {
+      const validatedData = await this.validationPipe.transform(chat, {
+        metatype: ChatDto.SendMessage,
+      } as any);
+      return await this.chatRepository.save(validatedData);
+    } catch (error) {
+      this.logger.error(
+        `Websocket message dto failed. Check your message body.`,
+      );
+    }
   }
 
   async getMessages(): Promise<Chat[]> {
@@ -49,20 +69,4 @@ export class ChatService {
       return error;
     }
   }
-  // async updateTodo(idv, todoData) {
-  //   try {
-  //     const firstUser = await this.todoRepository.findOneBy(idv);
-  //     return await this.todoRepository
-  //       .createQueryBuilder()
-  //       .update(Todo)
-  //       .set({
-  //         job: todoData.job,
-  //         description: todoData.description,
-  //       })
-  //       .where('id = :id', { id: firstUser.id })
-  //       .execute();
-  //   } catch (err) {
-  //     return `updateTodo hata: ${err}`;
-  //   }
-  // }
 }

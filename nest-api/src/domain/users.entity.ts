@@ -5,14 +5,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Repository } from 'typeorm';
-
-export class UsersRepository extends Repository<Users> {}
 
 @Entity()
 export class Users {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   username: string;

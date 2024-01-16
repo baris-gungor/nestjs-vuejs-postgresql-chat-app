@@ -1,18 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { Users } from './users.entity';
+import { Users } from '../../domain';
+import * as bcrypt from 'bcrypt';
+import { UsersDto } from '../../dtos/users.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(Users)
-    private readonly usersRepository: Repository<Users>,
+    @Inject('USERS_REPOSITORY') private usersRepository: Repository<Users>,
   ) {}
+  private readonly logger = new Logger(UsersService.name);
 
-  async findUsers(data: any) {
+  async userLogin(data: any) {
     try {
-      console.log(data);
       const res = await this.usersRepository
         .createQueryBuilder()
         .select('user')
@@ -22,7 +22,8 @@ export class UsersService {
       if (res === null) {
         return { userExists: false, loginSuccess: false };
       } else {
-        if (res.password === data.password) {
+        this.logger.debug(await bcrypt.compare(data.password, res.password));
+        if ((await bcrypt.compare(data.password, res.password)) === true) {
           const updateDate = new Date();
           const lastUpdate = await this.usersRepository
             .createQueryBuilder()
@@ -40,35 +41,56 @@ export class UsersService {
         }
       }
     } catch (err) {
-      console.log(`addUsers hata: ${err}`);
-      return err;
+      this.logger.error(`/users/login ERR: ${err}`);
+      return {
+        code: 200,
+        message: `Error happened while loggin proccess!`,
+        status: false,
+      };
     }
   }
 
   async getUsers() {
     return await this.usersRepository.find();
   }
-  
+
   async addUser(data: any) {
-    console.log(data);
-    const res = await this.usersRepository
-      .createQueryBuilder()
-      .select('user')
-      .from(Users, 'user')
-      .where('user.username = :username', { username: data.username })
-      .getOne();
-    if (res === null) {
-      return {};
-    } else {
-      return await this.usersRepository.save(data);
+    try {
+      const saltRounds = 12;
+      const hashedPassword = await bcrypt.hash(data.password, saltRounds);
+      const userFind = await this.usersRepository
+        .createQueryBuilder()
+        .select('user')
+        .from(Users, 'user')
+        .where('user.username = :username', { username: data.username })
+        .getOne();
+      if (userFind === null) {
+        const user: UsersDto.UserLogin = {
+          username: data.username,
+          password: hashedPassword,
+        };
+        const userCreate = await this.usersRepository.save(user);
+        if (userCreate && userCreate.id) {
+          return {
+            code: 200,
+            message: 'User saved in the system!',
+            status: true,
+          };
+        }
+      } else {
+        return {
+          code: 200,
+          message: 'Username already taken!',
+          status: false,
+        };
+      }
+    } catch (error) {
+      this.logger.error(`/users/add ERR: ${error}`);
+      return {
+        code: 200,
+        message: `Error happened while saving user in the system!`,
+        status: false,
+      };
     }
   }
-
-  // async saveUsers(data) {
-  //   try {
-  //     return await this.usersRepository.save(data);
-  //   } catch (err) {
-  //     return `addUsers hata: ${err}`;
-  //   }
-  // }
 }
