@@ -12,7 +12,7 @@ export class AppService {
   private readonly logger = new Logger(AppService.name);
   public async seedDB() {
     try {
-      this.logger.debug('Application seed proccess started');
+      this.logger.debug('Application seed process started');
       const seedSQLs: string[] = fs
         .readdirSync('src/database/seeds')
         .filter((fn) => fn.endsWith('.sql'))
@@ -59,7 +59,7 @@ export class AppService {
       this.logger.debug('DB Seeding Finished.');
       return seedSQLs.length > 0;
     } catch (error) {
-      this.logger.error('Application seed proccess gives an error', error);
+      this.logger.error('Application seed process gives an error', error);
     }
   }
   private fileHash(content: string): string {

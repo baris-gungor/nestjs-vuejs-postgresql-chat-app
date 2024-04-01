@@ -2,32 +2,28 @@ import {
   Post,
   Get,
   Res,
-  Render,
   HttpCode,
   Body,
   UseGuards,
   Logger,
   UsePipes,
   ValidationPipe,
-  SetMetadata,
-  UseInterceptors,
+  Req,
 } from '@nestjs/common';
 import { Controller } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiGuard } from '../../guards';
 import { UsersDto } from '../../dtos/users.dto';
 import {
-  ApiBearerAuth,
   ApiBody,
   ApiHeader,
-  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { CronService } from '../cron';
 
 @ApiTags('Users')
 @Controller('/users')
-@UseGuards(ApiGuard)
+// @UseGuards(ApiGuard)
 @ApiHeader({
   name: 'auth',
   description:
@@ -67,5 +63,16 @@ export class UsersController {
   })
   async addUser(@Body() data: UsersDto.UserLogin) {
     return await this.usersService.addUser(data);
+  }
+
+  @Get('/github-login')
+  public async githubLoginUrl(@Res() res: any) {
+    const tokenResponse = await this.usersService.githubLoginUrl();
+    res.redirect(301, tokenResponse);
+  }
+
+  @Get('/github-receive-callback')
+  public async githubReceiveCallback(@Req() req: any) {
+    return await this.usersService.githubReceiveCallback(req.query);
   }
 }
