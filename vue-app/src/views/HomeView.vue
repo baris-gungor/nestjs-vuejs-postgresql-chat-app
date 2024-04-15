@@ -1,6 +1,7 @@
 <template>
   <div class="sc-home-container">
     <v-card-title class="sc-title">
+      <img :src="avatarUrl" alt="" style="width: 64px; height: 64px" />
       <span class="text-h2 text-center">Chat App</span
       ><v-btn @click="logout">Logout</v-btn>
     </v-card-title>
@@ -52,12 +53,12 @@
 </template>
 
 <script>
-import SocketioService from "../services/socketio.service";
+import SocketIoService from "../services/socketio.service";
 export default {
   name: "Home",
   components: {},
   data: () => ({
-    apiUrl: "http://localhost:3000/",
+    apiUrl: "http://localhost:3000",
     dialog: false,
     users: [],
     text: "",
@@ -67,11 +68,13 @@ export default {
     userList: [],
     userSelected: false,
     lastMessageId: 1,
+    avatarUrl: "",
   }),
   created() {
     const currentUser = JSON.parse(window.localStorage.getItem("session"));
     this.username = currentUser.username;
-    // console.log(this.username);
+    this.avatarUrl = currentUser.avatarUrl;
+    console.log(this.avatarUrl);
     const header = {
       Authorization:
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDM2ODUwMjMsImV4cCI6MTcwMzY4ODYyM30.0f2e5j9DSWjdttKspU0pjCh_sBJaWzvp_KD1K6mIc5c",
@@ -80,7 +83,7 @@ export default {
       method: "GET",
       headers: header,
     };
-    fetch(this.apiUrl + "users/allUsers", data)
+    fetch(this.apiUrl + "/users/allUsers", data)
       .then((response) => response.json())
       .then((data) => {
         data.forEach((el) => {
@@ -91,7 +94,7 @@ export default {
         });
       });
 
-    this.webSocket = SocketioService.setupSocketConnection();
+    this.webSocket = SocketIoService.setupSocketConnection();
   },
   methods: {
     sendMessage() {
@@ -105,8 +108,23 @@ export default {
       if (this.items[0].username == "system") {
         this.items.shift();
       }
-      window.scrollTo(0, document.body.scrollHeight);
+      this.lastMessageId++;
+      const messages = [
+        ...this.items,
+        {
+          ...message,
+          id: this.lastMessageId,
+          createdAt: new Date().toISOString(),
+        },
+      ];
+      this.items = messages;
+      console.log("item", this.lastMessageId);
+      setTimeout(
+        document.getElementById(Number(this.lastMessageId)).scrollIntoView(),
+        1000
+      );
     },
+
     logout() {
       window.localStorage.setItem(
         "session",
@@ -119,7 +137,7 @@ export default {
     },
     async selectedUser(data) {
       this.userSelected = data;
-      const url = `${this.apiUrl}chat/conversation`;
+      const url = `${this.apiUrl}/chat/conversation`;
       const sendData = {
         username: this.username,
         sendTo: this.userSelected,
@@ -159,10 +177,10 @@ export default {
           }
         })
         .catch((err) => console.error(err));
-      this.webSocket.on("recMessage", (message) => {
+      this.webSocket.on("sendMessage", (message) => {
         this.selectedUser(this.userSelected);
-        // messages.push(message);
-        // this.items = messages;
+        messages.push(message);
+        this.items = messages;
       });
       setTimeout(
         document.getElementById(this.lastMessageId).scrollIntoView(),

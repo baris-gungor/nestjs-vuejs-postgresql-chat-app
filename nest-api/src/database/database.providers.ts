@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm';
 
-const dotenv = require('dotenv').config();
+const dotenv = require('dotenv').config({ path: '../.env' })
 
 export const databaseProviders = [
   {

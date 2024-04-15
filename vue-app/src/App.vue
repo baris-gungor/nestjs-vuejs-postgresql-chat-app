@@ -19,7 +19,7 @@ export default {
     this.auth = JSON.parse(window.localStorage.getItem('session'));
     if (this.auth) {
       if (!this.auth.username) {
-        alert('Please login');
+        // alert('Please login');
       } else {
         let updateDate = Date.parse(this.auth.updateDate);
         let dateVal = new Date();

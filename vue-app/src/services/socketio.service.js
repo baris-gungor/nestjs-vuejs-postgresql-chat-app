@@ -1,13 +1,27 @@
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
+import config from "../config/config";
 
-class SocketioService {
+class SocketIoService {
   socket;
-  constructor() { }
-
+  constructor() {}
   setupSocketConnection() {
-    this.socket = io('http://localhost:3000');
+    const { apiUrl } = config.config;
+    const uri = `${apiUrl !== "/" ? apiUrl : ""}/chat`;
+    const path = "";
+    const autoConnect = true;
+    const forceNew = true;
+    const transports = ["websocket"];
+    const reconnection = true;
+    const opts = {
+      path,
+      autoConnect,
+      forceNew,
+      transports,
+      reconnection,
+    };
+    this.socket = io(uri, opts);
     return this.socket;
   }
 }
 
-export default new SocketioService();
+export default new SocketIoService();

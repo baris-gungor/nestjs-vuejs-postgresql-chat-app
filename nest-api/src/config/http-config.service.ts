@@ -1,6 +1,6 @@
 import { HttpModuleOptions, HttpModuleOptionsFactory } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-const dotenv = require('dotenv').config();
+const dotenv = require('dotenv').config({ path: '../.env' })
 
 @Injectable()
 export class HttpConfigService implements HttpModuleOptionsFactory {

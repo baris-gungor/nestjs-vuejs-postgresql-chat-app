@@ -6,6 +6,7 @@ import { CronModule } from '../cron';
 import { HttpModule } from '@nestjs/axios';
 import { HttpConfigService } from 'src/config/http-config.service';
 import { CacheModule } from '@nestjs/cache-manager';
+import { ChatModule } from '../chat/chat.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     HttpModule.registerAsync({
       useClass: HttpConfigService,
     }),
+    ChatModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

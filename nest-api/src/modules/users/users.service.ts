@@ -7,11 +7,15 @@ import { HttpService } from '@nestjs/axios';
 import { v4 as uuid } from 'uuid';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { ConfigService } from 'src/config/config.service';
+import { ChatGateway } from '../chat/chat.gateway';
 
+const config = new ConfigService().getConfigService() as any;
 @Injectable()
 export class UsersService {
   constructor(
     private readonly httpService: HttpService,
+    private readonly chatGateway: ChatGateway,
     @Inject('USERS_REPOSITORY') private usersRepository: Repository<Users>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
@@ -19,12 +23,14 @@ export class UsersService {
 
   async userLogin(data: any) {
     try {
+      console.log('data', data);
       const res = await this.usersRepository
         .createQueryBuilder()
         .select('user')
         .from(Users, 'user')
         .where('user.username = :username', { username: data.username })
         .getOne();
+      console.log('res', res);
       if (res === null) {
         return { userExists: false, loginSuccess: false };
       } else {
@@ -62,6 +68,7 @@ export class UsersService {
 
   async addUser(data: any) {
     try {
+      console.log('data', data);
       const saltRounds = 12;
       const hashedPassword = await bcrypt.hash(data.password, saltRounds);
       const userFind = await this.usersRepository
@@ -70,6 +77,7 @@ export class UsersService {
         .from(Users, 'user')
         .where('user.username = :username', { username: data.username })
         .getOne();
+      console.log('hashedPassword', hashedPassword);
       if (userFind === null) {
         const user: UsersDto.UserLogin = {
           username: data.username,
@@ -86,7 +94,7 @@ export class UsersService {
       } else {
         return {
           code: 200,
-          message: 'Username already taken!',
+          message: 'username already taken!',
           status: false,
         };
       }
@@ -119,7 +127,11 @@ export class UsersService {
       state,
     };
     await this.cacheManager.set('githubKey', { ...githubKey }, 600000);
-    return loginUrl;
+    return {
+      code: 200,
+      message: 'Github link',
+      loginUrl,
+    };
   }
 
   public async githubReceiveCallback(query) {
@@ -148,17 +160,26 @@ export class UsersService {
             headers,
           });
           if (resUserInfo && resUserInfo.data) {
-            return resUserInfo.data;
+            const clientRedirectUrl = `http://${config.VUE_APP_ClIENT_HOST}:${config.VUE_APP_CLIENT_PORT}`;
+            const returnUser = { ...resUserInfo.data, clientRedirectUrl };
+            const newUser = {
+              username: returnUser?.login || '',
+              password: `${returnUser?.id}` || '',
+            };
+            await this.addUser(newUser);
+            const session = {
+              id: returnUser?.id || '',
+              username: returnUser?.login || '',
+              userFirstName: returnUser?.name || '',
+              avatarUrl: returnUser?.avatar_url || '',
+            };
+            this.chatGateway.server.emit('newEvent', session);
+            return returnUser;
           }
         }
       }
     } catch (error) {
       this.logger.error('githubReceiveCallback', error);
-    } finally {
-      return {
-        status: 406,
-        message: 'There is an error occurred in sign in',
-      };
     }
   }
 }

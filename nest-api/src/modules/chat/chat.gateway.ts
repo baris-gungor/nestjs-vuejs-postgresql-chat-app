@@ -13,14 +13,9 @@ import { Chat } from '../../domain';
 import { Logger, UseGuards } from '@nestjs/common';
 import { ApiGuard } from '../../guards';
 
-// @WebSocketGateway({
-//   cors: {
-//     origin: '*',
-//   },
-// })
 @WebSocketGateway({
   namespace: 'chat',
-  // path: '/ws',
+  path: '',
   transports: ['websocket'],
   cors: {
     origin: '*',
@@ -36,8 +31,15 @@ export class ChatGateway
 
   @SubscribeMessage('sendMessage')
   async handleSendMessage(client: Socket, message: Chat) {
+    console.log('mesaj geldi', message);
     await this.chatService.sendMessage(message);
     this.server.emit('recMessage', message);
+  }
+
+  // public async newEvent(@MessageBody() data: any, @ConnectedSocket() client: Socket)
+  @SubscribeMessage('newEvent')
+  public async handleNewEvent(event: string, data: any) {
+    this.server.emit('recMessage', data);
   }
 
   afterInit(server: Server) {

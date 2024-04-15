@@ -14,12 +14,9 @@ import { Controller } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiGuard } from '../../guards';
 import { UsersDto } from '../../dtos/users.dto';
-import {
-  ApiBody,
-  ApiHeader,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBody, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { CronService } from '../cron';
+import { ConfigService } from 'src/config/config.service';
 
 @ApiTags('Users')
 @Controller('/users')
@@ -46,6 +43,7 @@ export class UsersController {
   })
   @UsePipes(new ValidationPipe())
   async findUsers(@Body() data: UsersDto.UserLogin) {
+    console.log("dat",data)
     return await this.usersService.userLogin(data);
   }
 
@@ -66,13 +64,19 @@ export class UsersController {
   }
 
   @Get('/github-login')
-  public async githubLoginUrl(@Res() res: any) {
-    const tokenResponse = await this.usersService.githubLoginUrl();
-    res.redirect(301, tokenResponse);
+  public async githubLoginUrl() {
+    const resp = await this.usersService.githubLoginUrl();
+    return resp;
   }
 
   @Get('/github-receive-callback')
-  public async githubReceiveCallback(@Req() req: any) {
-    return await this.usersService.githubReceiveCallback(req.query);
+  public async githubReceiveCallback(@Res() res: any, @Req() req: any) {
+    const resp = await this.usersService.githubReceiveCallback(req.query);
+    res.redirect(301, resp.clientRedirectUrl);
+  }
+
+  @Post('/github-test')
+  public async testfonk(@Body() body:any) {
+    await this.usersService.testfonk(body);
   }
 }
