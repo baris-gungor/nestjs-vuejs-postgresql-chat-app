@@ -75,8 +75,4 @@ export class UsersController {
     res.redirect(301, resp.clientRedirectUrl);
   }
 
-  @Post('/github-test')
-  public async testfonk(@Body() body:any) {
-    await this.usersService.testfonk(body);
-  }
 }
