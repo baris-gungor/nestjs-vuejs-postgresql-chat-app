@@ -4,19 +4,38 @@
 </template>
 
 <script>
-import Mainframe from './router/Mainframe.vue';
-import Login from './router/Login.vue';
+import SocketIoService from "./services/socketio.service";
+import Mainframe from "./router/Mainframe.vue";
+import Login from "./router/Login.vue";
+import { v4 as uuidv4 } from "uuid";
 export default {
-  name: 'App',
+  name: "App",
   components: { Mainframe, Login },
   data() {
     return {
       isLogin: false,
       auth: null,
+      webSocket: null,
     };
   },
   created() {
-    this.auth = JSON.parse(window.localStorage.getItem('session'));
+    const sessionId = window.localStorage.getItem("sessionId");
+    if (!sessionId) {
+      const uuid = uuidv4();
+      window.localStorage.setItem("sessionId", uuid);
+    }
+    console.log("sessionId", sessionId);
+    this.webSocket = SocketIoService.setupSocketConnection();
+    this.webSocket.on("newEvent", (message) => {
+      console.log("mess", message);
+      window.localStorage.setItem(
+        "session",
+        JSON.stringify({
+          ...message,
+        })
+      );
+    });
+    this.auth = JSON.parse(window.localStorage.getItem("session"));
     if (this.auth) {
       if (!this.auth.username) {
         // alert('Please login');
@@ -30,7 +49,7 @@ export default {
         // console.log('minutes: ', minutes);
         let hours = minutes / 60; //how many hours
         if (minutes > 180) {
-          window.localStorage.setItem('session', JSON.stringify({}));
+          window.localStorage.setItem("session", JSON.stringify({}));
         } else {
           this.isLogin = true;
         }
@@ -48,7 +67,7 @@ export default {
   --buttonText: #404258;
 }
 
-[theme='dark'] {
+[theme="dark"] {
   --primaryBack: #404258;
   --secondaryBack: #474e68;
   --thirdBack: #50577a;

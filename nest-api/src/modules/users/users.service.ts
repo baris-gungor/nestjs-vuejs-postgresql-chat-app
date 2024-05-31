@@ -1,3 +1,4 @@
+import { CronService } from './../cron/cron.service';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Users } from '../../domain';
@@ -16,6 +17,7 @@ export class UsersService {
   constructor(
     private readonly httpService: HttpService,
     private readonly chatGateway: ChatGateway,
+    private readonly cronService: CronService,
     @Inject('USERS_REPOSITORY') private usersRepository: Repository<Users>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
@@ -111,7 +113,7 @@ export class UsersService {
   public async githubLoginUrl() {
     const client_secret = 'e6d654f7dc57d27bd15ed985800947ee3db3aa1e';
     const client_id = '7972603f3e53797500b5';
-    const redirect_uri = 'http://localhost:3000/users/github-receive-callback';
+    const redirect_uri = `http://${config.API_HOST}:${config.API_PORT}/users/github-receive-callback`;
     const state = uuid();
     const allow_signup = false; // example, can be changed
     const clientIdEncoded = encodeURIComponent(client_id);
@@ -167,12 +169,15 @@ export class UsersService {
               password: `${returnUser?.id}` || '',
             };
             await this.addUser(newUser);
+
             const session = {
               id: returnUser?.id || '',
               username: returnUser?.login || '',
               userFirstName: returnUser?.name || '',
               avatarUrl: returnUser?.avatar_url || '',
             };
+            const token = await this.cronService.createAccessToken(session);
+            console.log('token:', token);
             this.chatGateway.server.emit('newEvent', session);
             return returnUser;
           }

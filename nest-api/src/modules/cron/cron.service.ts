@@ -10,7 +10,7 @@ export class CronService {
     this.generateUuid();
   }
   private readonly logger = new Logger(CronService.name);
-  // private readonly secretKey = 'yourSecretKey';
+  private readonly secretKey = 'yourSecretKey';
   private accessToken = '';
   private uuid: string;
 
@@ -33,6 +33,13 @@ export class CronService {
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDM2ODUwMjMsImV4cCI6MTcwMzY4ODYyM30.0f2e5j9DSWjdttKspU0pjCh_sBJaWzvp_KD1K6mIc5c';
     this.logger.debug(`accessToken: ${this.accessToken}`);
     return this.accessToken;
+  }
+
+  createAccessToken(payload) {
+    const options = { expiresIn: '1h' }; 
+    const accessToken = jwt.sign(payload, this.secretKey, options);
+    this.logger.debug(`accessToken: ${accessToken}`);
+    return accessToken;
   }
 
   getAccessToken() {

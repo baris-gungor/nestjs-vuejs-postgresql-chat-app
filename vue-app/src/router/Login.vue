@@ -64,15 +64,15 @@ export default {
       this.apiUrl = apiUrl;
     }
     this.webSocket = SocketIoService.setupSocketConnection();
-    this.webSocket.on("newEvent", (message) => {
-      console.log("mess", message);
-      window.localStorage.setItem(
-        "session",
-        JSON.stringify({
-          ...message,
-        })
-      );
-    });
+    // this.webSocket.on("newEvent", (message) => {
+    //   // console.log("mess", message);
+    //   window.localStorage.setItem(
+    //     "session",
+    //     JSON.stringify({
+    //       ...message,
+    //     })
+    //   );
+    // });
   },
   computed: {},
   methods: {
@@ -112,6 +112,7 @@ export default {
           });
       }
     },
+
     async reqSignUp() {
       if (this.username.length > 1 && this.password.length > 1) {
         const url = `${this.apiUrl}/users/add`;
@@ -131,7 +132,7 @@ export default {
           .then((response) => response.json())
           .then((data) => {
             // console.log(data);
-            console.log("user durum:", data);
+            // console.log("user durum:", data);
             if (data && data.status == true) {
               this.loginForm;
               alert("Successfully signed in! Please now login");
@@ -141,16 +142,19 @@ export default {
           });
       }
     },
+
     async signUpForm() {
       this.login = false;
       this.username = "";
       this.password = "";
     },
+
     async loginForm() {
       this.login = true;
       this.username = "";
       this.password = "";
     },
+
     async loginGithub() {
       const url = `${this.apiUrl}/users/github-login`;
       const req = {
@@ -168,11 +172,6 @@ export default {
             window.location.href = this.githubUrl;
           }
         });
-    },
-    returnLogin() {
-      this.webSocket.on("newEvent", (message) => {
-        console.log("mess", message);
-      });
     },
   },
 };

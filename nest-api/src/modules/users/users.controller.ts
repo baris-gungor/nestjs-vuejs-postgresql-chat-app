@@ -16,7 +16,6 @@ import { ApiGuard } from '../../guards';
 import { UsersDto } from '../../dtos/users.dto';
 import { ApiBody, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { CronService } from '../cron';
-import { ConfigService } from 'src/config/config.service';
 
 @ApiTags('Users')
 @Controller('/users')

@@ -54,6 +54,7 @@
 
 <script>
 import SocketIoService from "../services/socketio.service";
+import config from "../config/config";
 export default {
   name: "Home",
   components: {},
@@ -71,10 +72,14 @@ export default {
     avatarUrl: "",
   }),
   created() {
+    if (config && config.config) {
+      const { apiUrl } = config.config;
+      this.apiUrl = apiUrl;
+    }
     const currentUser = JSON.parse(window.localStorage.getItem("session"));
     this.username = currentUser.username;
     this.avatarUrl = currentUser.avatarUrl;
-    console.log(this.avatarUrl);
+    // console.log(this.avatarUrl);
     const header = {
       Authorization:
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDM2ODUwMjMsImV4cCI6MTcwMzY4ODYyM30.0f2e5j9DSWjdttKspU0pjCh_sBJaWzvp_KD1K6mIc5c",
@@ -118,7 +123,7 @@ export default {
         },
       ];
       this.items = messages;
-      console.log("item", this.lastMessageId);
+      // console.log("item", this.lastMessageId);
       setTimeout(
         document.getElementById(Number(this.lastMessageId)).scrollIntoView(),
         1000
